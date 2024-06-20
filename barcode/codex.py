@@ -276,5 +276,22 @@ class Gs1_128(Code128):  # noqa: N801
         return super().get_fullcode()[1:]
 
 
+class Gs1_128_AI(Code128):
+    name = "GS1-128_AI"
+    FNC1_CHAR = "\xf1"
+
+    # Application_Identifiers: AI name: AI code
+    AI  = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'BEST_BEFORE:': '15', 
+           'PROD_DATE': '11', 'DUE_DATE': '12', 'PACK_DATE': '13', 'BEST_BEFORE': '15', 'SELL_BY': '16',
+           'USE_BY_OR_EXPIRY': '17', 'VARIANT': '20', 'SERIAL': '21', 'CPV': '22', 'TPX': '235', 
+           'ADDITIONAL_ID': '240', 'CUST_PART_NO': '241', 'MTO_VARIANT': '242', 'PCN': '243', 
+           'SECONDARY_SERIAL': '250', 'REF_TO_SOURCE': '251', 'GTDI': '253', 'GLM_EXTENSION': '254', 
+           'GCN': '255', 'VAR_COUNT': '30', 'NET_WEIGHT_M': '310', 'LENGTH_m': '311', 'WIDTH_M': '312', 
+           'HEIGHT_M': '313', 'AREA_M2': '314', 'NET_VOLUME_L': '315', 'NET_VOLUME_M3': '316', 
+           'NET_WEIGHT_LB': '320'}
+    
+    AI_WITH_FNC1 = {'10', '21', '22', '235', '240', '241', '242', '243', '250', '251', '253', '254', '255',
+                    '30', }  
+
 # For pre 0.8 compatibility
 PZN = PZN7
