@@ -281,17 +281,47 @@ class Gs1_128_AI(Code128):
     FNC1_CHAR = "\xf1"
 
     # Application_Identifiers: AI name: AI code
-    AI  = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'BEST_BEFORE:': '15', 
-           'PROD_DATE': '11', 'DUE_DATE': '12', 'PACK_DATE': '13', 'BEST_BEFORE': '15', 'SELL_BY': '16',
-           'USE_BY_OR_EXPIRY': '17', 'VARIANT': '20', 'SERIAL': '21', 'CPV': '22', 'TPX': '235', 
-           'ADDITIONAL_ID': '240', 'CUST_PART_NO': '241', 'MTO_VARIANT': '242', 'PCN': '243', 
-           'SECONDARY_SERIAL': '250', 'REF_TO_SOURCE': '251', 'GTDI': '253', 'GLM_EXTENSION': '254', 
-           'GCN': '255', 'VAR_COUNT': '30', 'NET_WEIGHT_M': '310', 'LENGTH_m': '311', 'WIDTH_M': '312', 
-           'HEIGHT_M': '313', 'AREA_M2': '314', 'NET_VOLUME_L': '315', 'NET_VOLUME_M3': '316', 
-           'NET_WEIGHT_LB': '320'}
+    AI_NAME_TO_CODE = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'BEST_BEFORE:': '15',
+                       'PROD_DATE': '11', 'DUE_DATE': '12', 'PACK_DATE': '13', 'BEST_BEFORE': '15', 'SELL_BY': '16',
+                       'USE_BY_OR_EXPIRY': '17', 'VARIANT': '20', 'SERIAL': '21', 'CPV': '22', 'TPX': '235',
+                       'ADDITIONAL_ID': '240', 'CUST_PART_NO': '241', 'MTO_VARIANT': '242', 'PCN': '243',
+                       'SECONDARY_SERIAL': '250', 'REF_TO_SOURCE': '251', 'GTDI': '253', 'GLM_EXTENSION': '254',
+                       'GCN': '255', 'VAR_COUNT': '30', 'COUNT': '37'}
+
+    AI_WITH_DECIMAL_VALS = {'NET_WEIGHT_M': '310', 'LENGTH_m': '311', 'WIDTH_M': '312',
+                            'HEIGHT_M': '313', 'AREA_M2': '314', 'NET_VOLUME_L': '315', 'NET_VOLUME_M3': '316',
+                            'NET_WEIGHT_LB': '320', '321': 'LENGTH_I', '322': 'LENGTH_F', '323': 'LENGTH_Y',
+                            '324': 'WIDTH_I', '325': 'WIDTH_F', '326': 'WIDTH_Y', '327': 'HEIGHT_I', '328': 'HEIGHT_F',
+                            '329': 'HEIGHT_Y', 'GROSS_WEIGHT_KG': '330', 'LENGTH_M_LOG': '331', 'WIDTH_M_LOG': '332',
+                            'HEIGHT_M_LOG': '333', 'AREA_M2_LOG': '334', 'VOLUME_L_LOG': '335', 'VOLUME_M3_LOG': '336',
+                            'KG_PER_M2': '337', 'GROSS_WEIGHT_LB': '340', 'LENGHT_I_LOG': '341', 'LENGHT_F_LOG': '342',
+
+                            }
     
     AI_WITH_FNC1 = {'10', '21', '22', '235', '240', '241', '242', '243', '250', '251', '253', '254', '255',
-                    '30', }  
+                    '30', '37', '390', '391', '392', '393', '394', '395', '400', '401', '402', '403', '420', '421',
+                    '422', '423', '424', '425', '426', '427', '4300', '4301', '4302', '4303', '4304', '4305', '4306',
+                    '4307', '4308', '4309', '4330', '4331', '4332', '4333', '7001', '7002', '7003', '7004', '7005',
+                    '7006', '7007', '7008', '7009', '7010', '7011', '7020', '7021', '7022', '7023', '703', '7040',
+                    '710', '711', '712', '713', '714', '715', '723', '7240', '7241', '7242', '8001', '8002', '8003',
+                    '8004', '8005', '8006', '8007', '8008', '8009', '8010', '8011', '8012', '8013', '8017', '8018',
+                    '8019', '8020', '8030', '8110', '8026', '8111', '8112', '8200', '90', '91', '92', '93', '94', '95',
+                    '96', '97', '98', '99'
+                    }
+
+    def __init__(self, code, code_with_ais, writer=None) -> None:
+        if code:
+            code = self.FNC1_CHAR + code
+        if code_with_ais:
+            for ai, val in code_with_ais:
+                if ai in self.AI_NAME_TO_CODE:
+                    pass
+                elif ai in self.AI_WITH_DECIMAL_VALS:
+                    pass
+        super().__init__(code, writer)
+
+    def get_fullcode(self):
+        return super().get_fullcode()[1:]
 
 # For pre 0.8 compatibility
 PZN = PZN7
