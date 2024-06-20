@@ -19,3 +19,4 @@ tests/index.html
 tests/test_outputs/
 tests/test.py
 test.py
+.idea
