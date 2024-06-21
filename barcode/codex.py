@@ -279,6 +279,7 @@ class Gs1_128(Code128):  # noqa: N801
 class Gs1_128_AI(Code128):
     name = "GS1-128_AI"
     FNC1_CHAR = "\xf1"
+    FC_CHAR = "\x1d"
 
     # Application_Identifiers: AI name: AI code
     AI_NAME_TO_CODE = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'BEST_BEFORE:': '15',
@@ -308,22 +309,48 @@ class Gs1_128_AI(Code128):
                     '8019', '8020', '8030', '8110', '8026', '8111', '8112', '8200', '90', '91', '92', '93', '94', '95',
                     '96', '97', '98', '99'
                     }
-    AI_VS_FIXED_LENGTH = {'00': 18, '01': 14, '02': 14, '11': 6, '12': 6, '13': 6, '15': 6, '16': 6, '17': 6, '20': 2,
-                          '310': 6, '311': 6, '312': 6, '313': 6, '314': 6, '315': 6, '316': 6,
-                          '320': 6, '321': 6, '322': 6, '323': 6, '324': 6, '325': 6, '326': 6, '327': 6, '328': 6,
-                          '329': 6, '330': 6, '331': 6, '332': 6, '333': 6, '334': 6, '335': 6, '336': 6, '337': 6,
-                          }
+    AI_VS_FIXED_LENGTH = {'00': 18, '01': 14, '02': 14, '11': 6, '12': 6, '13': 6, '15': 6, '16': 6, '17': 6, '20': 2}
+    AI_VS_FIXED_LENGTH_WITH_DECIMAL = {'310', '311', '312', '313', '314', '315', '316', '320', '321', '322', '323',
+                                       '324', '325', '326', '327', '328', '329', '330', '331', '332', '333', '334',
+                                       '335', '336', '337'}
 
     def __init__(self, code, code_with_ais, writer=None) -> None:
         if code:
-            code = self.FNC1_CHAR + code
+            self.code = self.FNC1_CHAR + code
         if code_with_ais:
+            codes_with_fixed_l = list()
+            codes_with_variable_lenght = list()
             for ai, val in code_with_ais:
                 if ai in self.AI_NAME_TO_CODE:
                     pass
-                elif ai in self.AI_WITH_DECIMAL_VALS:
+                if ai in self.AI_WITH_DECIMAL_VALS:
                     pass
         super().__init__(code, writer)
+
+    def get_code_and_val(self, code_with_ais):
+        code_and_val = list()
+        for ai, val in code_with_ais:
+            if ai in self.AI_NAME_TO_CODE:
+                ai = self.AI_NAME_TO_CODE[ai]
+            if ai in self.AI_VS_FIXED_LENGTH:
+                if len(val) == self.AI_VS_FIXED_LENGTH[ai]:
+                    return ai, val
+            elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
+                if len(ai) == 3:
+                    try:
+                        num_val = int(val)
+                    except ValueError:
+                        print('For AI: %s only number values are possible, %s was provided.' % (ai, val))
+                        return ai+'0', val
+                    else:
+                        if len(val) < 6:
+                            print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
+                            print('Filing missing gaps with 0.')
+                            val = val.zfill(6)
+                        elif len(val) > 6:
+                            print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
+                        return ai+'0', val
+
 
     def get_fullcode(self):
         return super().get_fullcode()[1:]
