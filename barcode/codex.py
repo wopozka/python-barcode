@@ -359,9 +359,14 @@ class Gs1_128_AI(Code128):
                     print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
                 return ai + '0', val[0:6]
             else:
-                pass
+                if len(val) < 6:
+                    val = val.zfil(6)
+                elif len(val) > 6:
+                    val = val[0:6]
+                main_part, fraction_part = val.split('.', 1)
+                return ai + str(len(fraction_part)), main_part + fraction_part
         if len(ai) == 4:
-
+            pass
         else:
             print('AI: %s too long, only 4 digits allowed' % ai)
             return ai, val
