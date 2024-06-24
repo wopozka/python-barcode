@@ -336,20 +336,35 @@ class Gs1_128_AI(Code128):
                 if len(val) == self.AI_VS_FIXED_LENGTH[ai]:
                     return ai, val
             elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
-                if len(ai) == 3:
-                    try:
-                        num_val = int(val)
-                    except ValueError:
-                        print('For AI: %s only number values are possible, %s was provided.' % (ai, val))
-                        return ai+'0', val
-                    else:
-                        if len(val) < 6:
-                            print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
-                            print('Filing missing gaps with 0.')
-                            val = val.zfill(6)
-                        elif len(val) > 6:
-                            print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
-                        return ai+'0', val
+
+
+    def get_val_for_ai_with_fixed_length_decimals(self, ai, val):
+        if ai[0:3] not in in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
+            return ai, val
+        # if len(ai) == 3, then we need co calculate forth digig - decimal place
+        try:
+            num_val = float(val)
+        except ValueError:
+            print('For AI: %s only number values are possible, %s was provided.' % (ai, val))
+            return ai + '0', val
+        # if we provide 3 digits, then the forth needs do be calculated according to value provided
+        if len(ai) == 3:
+            # case 1 val is integer number
+            if '.' not in val:
+                if len(val) < 6:
+                    # print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
+                    # print('Filing missing gaps with 0.')
+                    val = val.zfill(6)
+                elif len(val) > 6:
+                    print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
+                return ai + '0', val[0:6]
+            else:
+                pass
+        if len(ai) == 4:
+
+        else:
+            print('AI: %s too long, only 4 digits allowed' % ai)
+            return ai, val
 
 
     def get_fullcode(self):
