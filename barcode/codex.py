@@ -315,18 +315,15 @@ class Gs1_128_AI(Code128):
                                        '335', '336', '337'}
 
     def __init__(self, code, code_with_ais, sorted_ais=True, writer=None) -> None:
+        self.sorted_ais = sorted_ais
         self.code = None
         if code:
             self.code = self.FNC1_CHAR + code
-        self.ai_code = list()
+        self.ai_value = list()
         if code_with_ais:
             for ai_val in code_with_ais:
-                self.ai_code.append(self.get_code_and_val(ai_val[0], ai_val[1]))
-        self.code = self.FNC1_CHAR
-        for ai, val in self.codes_with_fnc1:
-            self.code += ai + val
-        for ai, val in self.codes_without_fnc1:
-            self.code += ai + val + self.FC_CHAR
+                self.ai_value.append(self.get_code_and_val(ai_val[0], ai_val[1]))
+        self.code = self.create_code()
         # FC_CHAR was added at the end, lets remove it now
         self.code = self.code[0:-2]
         super().__init__(code, writer)
@@ -387,15 +384,37 @@ class Gs1_128_AI(Code128):
     def is_fnc1_required(self, ai):
         return ai in self.AI_WITH_FNC1
 
+    def create_code(self):
+        ais_with_nfc1 = ''
+        ais_without_nfc1 = ''
+        for ai, value in self.ai_value:
+            if self.sorted_ais:
+                if self.is_fnc1_required(ai):
+                    ais_with_nfc1 += ai + value + self.FC_CHAR
+                else:
+                    ais_without_nfc1 += ai + value
+            else:
+                ais_with_nfc1 += ai + value
+                if self.is_fnc1_required(ai):
+                    ais_with_nfc1 += self.FC_CHAR
+        return self.FNC1_CHAR + ais_without_nfc1 + ais_with_nfc1
+
     def get_fullcode(self):
         # return super().get_fullcode()[1:]
         return self.get_text_from_ai_and_values()
 
     def get_text_from_ai_and_values(self):
-        text = ''
-        for ai, val in self.codes_with_fnc1 + self.codes_without_fnc1:
-            text += '(' + ai + ')' + val
-        return text
+        text_with_nfc1 = ''
+        text_without_nfc1 = ''
+        for ai, val in self.ai_value:
+            if self.sorted_ais:
+                if self.is_fnc1_required(ai):
+                    text_with_nfc1 += '(' + ai + ')' + val
+                else:
+                    text_without_nfc1 += '(' + ai + ')' + val
+            else:
+                text_with_nfc1 += '(' + ai + ')' + val
+        return text_without_nfc1 + text_with_nfc1
 
     def render(self, writer_options=None, text=None):
         if text is not None and text:
