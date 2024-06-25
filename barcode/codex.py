@@ -336,10 +336,10 @@ class Gs1_128_AI(Code128):
                 if len(val) == self.AI_VS_FIXED_LENGTH[ai]:
                     return ai, val
             elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
-
+                pass
 
     def get_val_for_ai_with_fixed_length_decimals(self, ai, val):
-        if ai[0:3] not in in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
+        if ai[0:3] not in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
             return ai, val
         # if len(ai) == 3, then we need co calculate forth digig - decimal place
         try:
