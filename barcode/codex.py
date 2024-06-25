@@ -315,28 +315,36 @@ class Gs1_128_AI(Code128):
                                        '335', '336', '337'}
 
     def __init__(self, code, code_with_ais, writer=None) -> None:
+        self.code = None
         if code:
             self.code = self.FNC1_CHAR + code
+        self.code_with_ais = None
+        self.cod_with_ais_text = None
         if code_with_ais:
-            codes_with_fixed_l = list()
-            codes_with_variable_lenght = list()
-            for ai, val in code_with_ais:
-                if ai in self.AI_NAME_TO_CODE:
-                    pass
-                if ai in self.AI_WITH_DECIMAL_VALS:
-                    pass
+            self.code_with_ais = self.FNC1_CHAR
+            self.cod_with_ais_text = ''
+            for ai_val in code_with_ais:
+                ai, val, fc_char = self.get_code_and_val(ai_val[0], ai_val[1])
+
+
+
         super().__init__(code, writer)
 
-    def get_code_and_val(self, code_with_ais):
-        code_and_val = list()
-        for ai, val in code_with_ais:
-            if ai in self.AI_NAME_TO_CODE:
-                ai = self.AI_NAME_TO_CODE[ai]
-            if ai in self.AI_VS_FIXED_LENGTH:
-                if len(val) == self.AI_VS_FIXED_LENGTH[ai]:
-                    return ai, val
-            elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
-                pass
+    def get_code_and_val(self, ai, val):
+        if ai in self.AI_NAME_TO_CODE:
+            ai = self.AI_NAME_TO_CODE[ai]
+        if ai in self.AI_VS_FIXED_LENGTH:
+            if len(val) != self.AI_VS_FIXED_LENGTH[ai]:
+                if ai in ('11', '12', '13', '15', '16', '17'):
+                    print('For AI %s correct date format is: YYYYMMDD. If only year and month is provided, '
+                          'then use 00 for days' % ai)
+                else:
+                    print('For AI %s, the length of value should be %s. If date ' % (ai, val))
+            return ai, val, ''
+        elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
+            return tuple([a for a in self.get_val_for_ai_with_fixed_length_decimals(ai, val)] + [''])
+        else:
+            return ai, val, self.FC_CHAR
 
     def get_val_for_ai_with_fixed_length_decimals(self, ai, val):
         if ai[0:3] not in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
