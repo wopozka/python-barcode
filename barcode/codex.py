@@ -387,5 +387,24 @@ class Gs1_128_AI(Code128):
     def get_fullcode(self):
         return super().get_fullcode()[1:]
 
+    def render(self, writer_options: dict | None = None, text: str | None = None):
+        """Renders the barcode using `self.writer`.
+
+        :param writer_options: Options for `self.writer`, see writer docs for details.
+        :param text: Text to render under the barcode.
+
+        :returns: Output of the writers render method.
+        """
+        options = self.default_writer_options.copy()
+        options.update(writer_options or {})
+        if options["write_text"] or text is not None:
+            if text is not None:
+                options["text"] = text
+            else:
+                options["text"] = self.get_fullcode()
+        self.writer.set_options(options)
+        code = self.build()
+        return self.writer.render(code)
+
 # For pre 0.8 compatibility
 PZN = PZN7
