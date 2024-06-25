@@ -347,23 +347,27 @@ class Gs1_128_AI(Code128):
         except ValueError:
             print('For AI: %s only number values are possible, %s was provided.' % (ai, val))
             return ai + '0', val
-        # if we provide 3 digits, then the forth needs do be calculated according to value provided
+        # if we provide 3 digits, then the forth needs to be calculated according to value provided
         if len(ai) == 3:
             # case 1 val is integer number
             if '.' not in val:
                 if len(val) < 6:
-                    # print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
+                    # print('For AI: %s 6 number length is required, %s was provided.' % (ai, val))
                     # print('Filing missing gaps with 0.')
                     val = val.zfill(6)
                 elif len(val) > 6:
-                    print('For AI: %s 6 number lenght is required, %s was provided.' % (ai, val))
+                    print('For AI: %s 6 number length is required, %s was provided.' % (ai, val))
                 return ai + '0', val[0:6]
             else:
-                if len(val) < 6:
-                    val = val.zfil(6)
-                elif len(val) > 6:
-                    val = val[0:6]
                 main_part, fraction_part = val.split('.', 1)
+                if len(val) < 7:
+                    for zeros_to_add in range(7-len(val)):
+                        fraction_part += '0'
+                elif len(val) > 7:
+                    if len(main_part) > 6:
+                        return ai + '0', main_part[0:6]
+                    fr_to_cut = 6 - len(main_part)
+                    fraction_part = fraction_part[0:fr_to_cut]
                 return ai + str(len(fraction_part)), main_part + fraction_part
         if len(ai) == 4:
             pass
