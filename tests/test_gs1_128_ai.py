@@ -1,7 +1,9 @@
 import pytest
 import sys
 import os.path
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../barcode'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from codex import Gs1_128_AI
 
 TEST_VAL_AI_FIXED_L = (
