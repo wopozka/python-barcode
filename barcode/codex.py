@@ -314,11 +314,12 @@ class Gs1_128_AI(Code128):
                                        '324', '325', '326', '327', '328', '329', '330', '331', '332', '333', '334',
                                        '335', '336', '337'}
 
-    def __init__(self, code, code_with_ais, sorted_ais=True, writer=None) -> None:
+    def __init__(self, code_with_brackets, code_with_ais, sorted_ais=True, writer=None) -> None:
         self.sorted_ais = sorted_ais
         self.code = None
-        if code:
-            self.code = self.FNC1_CHAR + code
+        self.code_with_brackets = None
+        if code_with_brackets:
+            self.code_with_brackets = self.get_codes_and_vals_from_brackets(code_with_brackets)
         self.ai_value = list()
         if code_with_ais:
             for ai_val in code_with_ais:
@@ -343,6 +344,16 @@ class Gs1_128_AI(Code128):
             return self.get_val_for_ai_with_fixed_length_decimals(ai, val)
         else:
             return ai, val
+    @staticfunction
+    def get_codes_and_vals_from_brackets(code_with_brackets):
+        if code_with_brackets[0] != '(':
+            print('Code %s does not start with (' % code_with_brackets)
+            return tuple()
+        ais_vals_list = list()
+        for ais_vals in code_with_brackets.split('('):
+            if ais_vals:
+                ais_vals_list.append(ais_vals.split(')'))
+        return tuple(ais_vals_list)
 
     def get_val_for_ai_with_fixed_length_decimals(self, ai, val):
         if ai[0:3] not in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
@@ -417,6 +428,7 @@ class Gs1_128_AI(Code128):
         return text_without_nfc1 + text_with_nfc1
 
     def render(self, writer_options=None, text=None):
+        self.code = self.create_code()
         if text is not None and text:
             self.get_fullcode()
         options = {"module_width": MIN_SIZE, "quiet_zone": MIN_QUIET_ZONE}
