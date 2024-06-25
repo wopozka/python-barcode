@@ -318,16 +318,22 @@ class Gs1_128_AI(Code128):
         self.code = None
         if code:
             self.code = self.FNC1_CHAR + code
-        self.code_with_ais = None
-        self.cod_with_ais_text = None
+        self.codes_with_fnc1 = list()
+        self.codes_without_fnc1 = list()
         if code_with_ais:
-            self.code_with_ais = self.FNC1_CHAR
-            self.cod_with_ais_text = ''
             for ai_val in code_with_ais:
                 ai, val, fc_char = self.get_code_and_val(ai_val[0], ai_val[1])
-
-
-
+                if fc_char:
+                    self.codes_with_fnc1.append((ai, val,))
+                else:
+                    self.codes_without_fnc1.append((ai, val,))
+        self.code = self.FNC1_CHAR
+        for ai, val in self.codes_with_fnc1:
+            self.code += ai + val
+        for ai, val in self.codes_without_fnc1:
+            self.code += ai + val + self.FC_CHAR
+        # FC_CHAR was added at the end, lets remove it now
+        self.code = self.code[0:-2]
         super().__init__(code, writer)
 
     def get_code_and_val(self, ai, val):
@@ -385,26 +391,21 @@ class Gs1_128_AI(Code128):
 
 
     def get_fullcode(self):
-        return super().get_fullcode()[1:]
+        # return super().get_fullcode()[1:]
+        return self.get_text_from_ai_and_values()
 
-    def render(self, writer_options: dict | None = None, text: str | None = None):
-        """Renders the barcode using `self.writer`.
+    def get_text_from_ai_and_values(self):
+        text = ''
+        for ai, val in self.codes_with_fnc1 + self.codes_without_fnc1:
+            text += '(' + ai + ')' + val
+        return text
 
-        :param writer_options: Options for `self.writer`, see writer docs for details.
-        :param text: Text to render under the barcode.
-
-        :returns: Output of the writers render method.
-        """
-        options = self.default_writer_options.copy()
+    def render(self, writer_options=None, text=None):
+        if text is not None and text:
+            self.get_fullcode()
+        options = {"module_width": MIN_SIZE, "quiet_zone": MIN_QUIET_ZONE}
         options.update(writer_options or {})
-        if options["write_text"] or text is not None:
-            if text is not None:
-                options["text"] = text
-            else:
-                options["text"] = self.get_fullcode()
-        self.writer.set_options(options)
-        code = self.build()
-        return self.writer.render(code)
+        return super().render(options, text)
 
 # For pre 0.8 compatibility
 PZN = PZN7
