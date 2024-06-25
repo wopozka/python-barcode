@@ -314,19 +314,14 @@ class Gs1_128_AI(Code128):
                                        '324', '325', '326', '327', '328', '329', '330', '331', '332', '333', '334',
                                        '335', '336', '337'}
 
-    def __init__(self, code, code_with_ais, writer=None) -> None:
+    def __init__(self, code, code_with_ais, sorted_ais=True, writer=None) -> None:
         self.code = None
         if code:
             self.code = self.FNC1_CHAR + code
-        self.codes_with_fnc1 = list()
-        self.codes_without_fnc1 = list()
+        self.ai_code = list()
         if code_with_ais:
             for ai_val in code_with_ais:
-                ai, val, fc_char = self.get_code_and_val(ai_val[0], ai_val[1])
-                if fc_char:
-                    self.codes_with_fnc1.append((ai, val,))
-                else:
-                    self.codes_without_fnc1.append((ai, val,))
+                self.ai_code.append(self.get_code_and_val(ai_val[0], ai_val[1]))
         self.code = self.FNC1_CHAR
         for ai, val in self.codes_with_fnc1:
             self.code += ai + val
@@ -346,11 +341,11 @@ class Gs1_128_AI(Code128):
                           'then use 00 for days' % ai)
                 else:
                     print('For AI %s, the length of value should be %s. If date ' % (ai, val))
-            return ai, val, ''
+            return ai, val
         elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
-            return tuple([a for a in self.get_val_for_ai_with_fixed_length_decimals(ai, val)] + [''])
+            return self.get_val_for_ai_with_fixed_length_decimals(ai, val)
         else:
-            return ai, val, self.FC_CHAR
+            return ai, val
 
     def get_val_for_ai_with_fixed_length_decimals(self, ai, val):
         if ai[0:3] not in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
@@ -389,6 +384,8 @@ class Gs1_128_AI(Code128):
             print('AI: %s too long, only 4 digits allowed' % ai)
             return ai, val
 
+    def is_fnc1_required(self, ai):
+        return ai in self.AI_WITH_FNC1
 
     def get_fullcode(self):
         # return super().get_fullcode()[1:]
