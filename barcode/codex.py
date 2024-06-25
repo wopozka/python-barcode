@@ -345,7 +345,7 @@ class Gs1_128_AI(Code128):
         else:
             return ai, val
     @staticfunction
-    def get_codes_and_vals_from_brackets(code_with_brackets):
+    def get_ai_and_vals_from_brackets(code_with_brackets):
         if code_with_brackets[0] != '(':
             print('Code %s does not start with (' % code_with_brackets)
             return tuple()
