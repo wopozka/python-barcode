@@ -317,7 +317,7 @@ class Gs1_128_AI(Code128):
     def __init__(self, code, sorted_ais=True, writer=None) -> None:
         self.sorted_ais = sorted_ais
         self.code = None
-        self.literal_cod = None
+        self.literal_code = None
         self.ai_value = None
         if isinstance(code, str):
             if self.check_if_code_correct(code):
@@ -434,8 +434,8 @@ class Gs1_128_AI(Code128):
                 ais_with_nfc1 += ai + value
                 if self.is_fnc1_required(ai):
                     ais_with_nfc1 += self.FC_CHAR
-        if ais_with_nfc1.ednsiwth(self.FC_CHAR):
-            ais_with_nfc1 = ais_with_nfc1[0:-2]
+        if ais_with_nfc1.endswith(self.FC_CHAR):
+            ais_with_nfc1 = ais_with_nfc1[0:-1]
         return self.FNC1_CHAR + ais_without_nfc1 + ais_with_nfc1
 
     def get_fullcode(self):
