@@ -314,20 +314,24 @@ class Gs1_128_AI(Code128):
                                        '324', '325', '326', '327', '328', '329', '330', '331', '332', '333', '334',
                                        '335', '336', '337'}
 
-    def __init__(self, code_with_brackets, code_with_ais, sorted_ais=True, writer=None) -> None:
+    def __init__(self, code, sorted_ais=True, writer=None) -> None:
         self.sorted_ais = sorted_ais
         self.code = None
-        self.code_with_brackets = None
-        if code_with_brackets:
-            self.code_with_brackets = self.get_codes_and_vals_from_brackets(code_with_brackets)
-        self.ai_value = list()
-        if code_with_ais:
-            for ai_val in code_with_ais:
+        self.ai_value = None
+        if isinstance(code, str):
+            if self.check_if_code_correct(code)
+                self.ai_value = self.get_ai_and_vals_from_brackets(code)
+            else:
+                self.code = code
+        elif isinstance(code, tuple):
+            self.ai_value = list()
+            for ai_val in code:
                 self.ai_value.append(self.get_code_and_val(ai_val[0], ai_val[1]))
+        else:
+            print('Code for barcode must be either as string or tuple(ai, value.')
+            return
         self.code = self.create_code()
-        # FC_CHAR was added at the end, lets remove it now
-        self.code = self.code[0:-2]
-        super().__init__(code, writer)
+        super().__init__(self.code, writer)
 
     def get_code_and_val(self, ai, val):
         if ai in self.AI_NAME_TO_CODE:
@@ -344,15 +348,28 @@ class Gs1_128_AI(Code128):
             return self.get_val_for_ai_with_fixed_length_decimals(ai, val)
         else:
             return ai, val
-    @staticfunction
+
+    @staticmethod
+    def check_if_code_correct(code_with_brackets):
+        # correct code is when all AI are surounded with brackets, and values are not, let's just check it
+        if not code_with_brackets:
+            return False
+        in_bracket = 0
+        for letter in code_with_brackets:
+            if letter not in '()':
+                continue
+            elif letter == '(':
+                in_bracket += 1
+            elif letter == ')':
+                in_bracket -= 1
+        return in_bracket == 0
+
+    @staticmethod
     def get_ai_and_vals_from_brackets(code_with_brackets):
-        if code_with_brackets[0] != '(':
-            print('Code %s does not start with (' % code_with_brackets)
-            return tuple()
         ais_vals_list = list()
         for ais_vals in code_with_brackets.split('('):
             if ais_vals:
-                ais_vals_list.append(ais_vals.split(')'))
+                ais_vals_list.append(tuple(ais_vals.split(')')))
         return tuple(ais_vals_list)
 
     def get_val_for_ai_with_fixed_length_decimals(self, ai, val):
