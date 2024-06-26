@@ -348,7 +348,7 @@ class Gs1_128_AI(Code128):
         if ai in self.AI_VS_FIXED_LENGTH:
             if len(val) != self.AI_VS_FIXED_LENGTH[ai]:
                 if ai in ('11', '12', '13', '15', '16', '17'):
-                    print('For AI %s correct date format is: YYYYMMDD. If only year and month is provided, '
+                    print('For AI %s correct date format is: YYMMDD. If only year and month is provided, '
                           'then use 00 for days' % ai)
                 else:
                     print('For AI %s, the length of value should be %s. If date ' % (ai, val))
