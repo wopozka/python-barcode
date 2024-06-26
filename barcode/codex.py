@@ -347,11 +347,11 @@ class Gs1_128_AI(Code128):
             ai = self.AI_NAME_TO_CODE[ai]
         if ai in self.AI_VS_FIXED_LENGTH:
             if len(val) != self.AI_VS_FIXED_LENGTH[ai]:
-                if ai in ('11', '12', '13', '15', '16', '17'):
+                if ai in ('11', '12', '13', '15', '16', '17') and not self.is_date_format_correct(val):
                     print('For AI %s correct date format is: YYMMDD. If only year and month is provided, '
                           'then use 00 for days' % ai)
                 else:
-                    print('For AI %s, the length of value should be %s. If date ' % (ai, val))
+                    print('For AI %s, the length of value should be %s.' % (ai, val))
             return ai, val
         elif 3 <= len(ai) <= 4 and ai[0:3] in self.AI_VS_FIXED_LENGTH_WITH_DECIMAL:
             return self.get_val_for_ai_with_fixed_length_decimals(ai, val)
@@ -420,6 +420,31 @@ class Gs1_128_AI(Code128):
 
     def is_fnc1_required(self, ai):
         return ai in self.AI_WITH_FNC1
+
+    @staticmethod
+    def is_date_format_correct(self, date):
+        # let's check if date is in correct format, correct format is
+        # YY - year, as the last two digits - required field
+        # MM - months, as two digits, only values 01-12 accepted - required field
+        # DD - days, if not necesary then use 00
+        months_dyas = {1: 31, 2:29, 3:31, 4:30, 5:31. 6:30, 7:31. 8:31. 9:30, 10:31, 11:30, 12:31}
+        if len(date) < 4:
+            return False
+        year = date[0:2]
+        month = date[2:4]
+        day = date[4:] if len(date) > 4 else ''
+        return_val = True
+        if not year.isdigit():
+            print('Year value incorrect, only numbers allowed: %s' % date[0:2])
+            return_val = False
+        if not (month.isdigit() and 1 <= int(month) <= 12):
+            print('Month value incorrect, only numbers from range 01-12 allowed: %s' % date[0:2])
+            return_val = False
+        if not(day and day.isdigit() and months_dyas[int(month)] > int(day)):
+            print('Day value incorrect, only number allowed and number of days should not exceed %s' %
+                  str(months_dyas[int(month)]))
+            return_val = False
+        return return_val
 
     def create_code(self):
         ais_with_nfc1 = ''
