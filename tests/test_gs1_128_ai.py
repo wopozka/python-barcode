@@ -19,7 +19,7 @@ TEST_VAL_AI_FIXED_L = (
 
 @pytest.mark.parametrize('target, answer', TEST_VAL_AI_FIXED_L)
 def test_get_val_for_ai_with_fixed_length_decimals(target, answer):
-    gs1_128 = Gs1_128_AI('', code_with_ais='')
+    gs1_128 = Gs1_128_AI('')
     assert gs1_128.get_val_for_ai_with_fixed_length_decimals(target[0], target[1]) == answer
 
 VISUAL_TO_TUPLE = (
@@ -28,3 +28,11 @@ VISUAL_TO_TUPLE = (
 @pytest.mark.parametrize('target, answer', VISUAL_TO_TUPLE)
 def test_get_ai_and_vals_from_brackets(target, answer):
     assert Gs1_128_AI.get_ai_and_vals_from_brackets(target) == answer
+
+CODE_CORRECTNESS = (
+    ('(01)08720299927469(11)240621(17)250621(10)20240621/0001', True,),
+    ('((01)08720299927469(11)240621(17)250621(10)20240621/0001', False,),
+)
+@pytest.mark.parametrize('target, answer', CODE_CORRECTNESS)
+def test_get_ai_and_vals_from_brackets(target, answer):
+    assert Gs1_128_AI.check_if_code_correct(target) == answer
