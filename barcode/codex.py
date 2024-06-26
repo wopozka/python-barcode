@@ -324,12 +324,12 @@ class Gs1_128_AI(Code128):
                 self.ai_value = self.get_ai_and_vals_from_brackets(code)
             else:
                 self.literal_code = code
-        elif isinstance(code, tuple):
+        elif isinstance(code, tuple) or isinstance(code, list):
             self.ai_value = list()
             for ai_val in code:
                 self.ai_value.append(self.get_code_and_val(ai_val[0], ai_val[1]))
         else:
-            print('Code for barcode must be either as string or tuple(ai, value.')
+            print('Code for barcode must be either as string or tuple/list (ai, value).')
             return
         if self.literal_code is not None:
             self.code = self.literal_code
@@ -485,7 +485,7 @@ class Gs1_128_AI(Code128):
         self.code = self.create_code()
         if text is not None and text:
             self.get_fullcode()
-        options = {"module_width": MIN_SIZE, "quiet_zone": MIN_QUIET_ZONE}
+        options = {"module_width": MIN_SIZE, "quiet_zone": MIN_QUIET_ZONE, "font_size": 10, 'center_text': True}
         options.update(writer_options or {})
         return super().render(options, text)
 
