@@ -427,7 +427,7 @@ class Gs1_128_AI(Code128):
         # YY - year, as the last two digits - required field
         # MM - months, as two digits, only values 01-12 accepted - required field
         # DD - days, if not necessary then use 00
-        months_days = {1: 31, 2:29, 3:31, 4:30, 5:31. 6:30, 7:31. 8:31. 9:30, 10:31, 11:30, 12:31}
+        months_days = {1: 31, 2:29, 3:31, 4:30, 5:31, 6:30, 7:31, 8:31, 9:30, 10:31, 11:30, 12:31}
         if len(date) < 4:
             return False
         year = date[0:2]
