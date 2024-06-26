@@ -426,8 +426,8 @@ class Gs1_128_AI(Code128):
         # let's check if date is in correct format, correct format is
         # YY - year, as the last two digits - required field
         # MM - months, as two digits, only values 01-12 accepted - required field
-        # DD - days, if not necesary then use 00
-        months_dyas = {1: 31, 2:29, 3:31, 4:30, 5:31. 6:30, 7:31. 8:31. 9:30, 10:31, 11:30, 12:31}
+        # DD - days, if not necessary then use 00
+        months_days = {1: 31, 2:29, 3:31, 4:30, 5:31. 6:30, 7:31. 8:31. 9:30, 10:31, 11:30, 12:31}
         if len(date) < 4:
             return False
         year = date[0:2]
@@ -440,9 +440,9 @@ class Gs1_128_AI(Code128):
         if not (month.isdigit() and 1 <= int(month) <= 12):
             print('Month value incorrect, only numbers from range 01-12 allowed: %s' % date[0:2])
             return_val = False
-        if not(day and day.isdigit() and months_dyas[int(month)] > int(day)):
+        if not(day and day.isdigit() and months_days[int(month)] > int(day)):
             print('Day value incorrect, only number allowed and number of days should not exceed %s' %
-                  str(months_dyas[int(month)]))
+                  str(months_days[int(month)]))
             return_val = False
         return return_val
 
