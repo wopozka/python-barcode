@@ -440,9 +440,10 @@ class Gs1_128_AI(Code128):
 
     def get_fullcode(self):
         # return super().get_fullcode()[1:]
-        return self.get_text_from_ai_and_values()
+        return self.get_hri_text()
 
-    def get_text_from_ai_and_values(self):
+    def get_hri_text(self):
+        # get Human Readable Interpretation text
         text_with_nfc1 = ''
         text_without_nfc1 = ''
         for ai, val in self.ai_value:
