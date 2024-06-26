@@ -320,7 +320,7 @@ class Gs1_128_AI(Code128):
         self.literal_cod = None
         self.ai_value = None
         if isinstance(code, str):
-            if self.check_if_code_correct(code)
+            if self.check_if_code_correct(code):
                 self.ai_value = self.get_ai_and_vals_from_brackets(code)
             else:
                 self.literal_code = code
