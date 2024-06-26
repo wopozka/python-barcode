@@ -317,12 +317,13 @@ class Gs1_128_AI(Code128):
     def __init__(self, code, sorted_ais=True, writer=None) -> None:
         self.sorted_ais = sorted_ais
         self.code = None
+        self.literal_cod = None
         self.ai_value = None
         if isinstance(code, str):
             if self.check_if_code_correct(code)
                 self.ai_value = self.get_ai_and_vals_from_brackets(code)
             else:
-                self.code = code
+                self.literal_code = code
         elif isinstance(code, tuple):
             self.ai_value = list()
             for ai_val in code:
@@ -330,7 +331,10 @@ class Gs1_128_AI(Code128):
         else:
             print('Code for barcode must be either as string or tuple(ai, value.')
             return
-        self.code = self.create_code()
+        if self.literal_code is not None:
+            self.code = self.literal_code
+        else:
+            self.code = self.create_code()
         super().__init__(self.code, writer)
 
     def get_code_and_val(self, ai, val):
