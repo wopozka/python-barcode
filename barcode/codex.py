@@ -485,8 +485,8 @@ class Gs1_128_AI(Code128):
         self.code = self.create_code()
         if text is not None and text:
             self.get_fullcode()
-        options = {"module_width": MIN_SIZE * 2.5, "quiet_zone": MIN_QUIET_ZONE, "font_size": 7, 'center_text': True,
-                   'text_distance': 3}
+        options = {"module_width": MIN_SIZE * 2.5, "quiet_zone": MIN_QUIET_ZONE, "font_size": 10, 'center_text': True,
+                   'text_distance': 5}
         options.update(writer_options or {})
         return super().render(options, text)
 
