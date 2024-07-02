@@ -467,6 +467,17 @@ class Gs1_128_AI(Code128):
         # return super().get_fullcode()[1:]
         return self.get_hri_text()
 
+    def get_fullcode_with_ai_description(self):
+        code_to_ai_name = {code: val for val, code in self.AI_NAME_TO_CODE.items()}
+        codewith_dec_to_ai_name = {code: val for val, code in self.AI_WITH_DECIMAL_VALS.items()}
+        for ai, val in self.ai_value:
+            if ai in code_to_ai_name:
+                print('%s: %s ' % (code_to_ai_name[ai], val))
+            elif ai[0:3] in codewith_dec_to_ai_name:
+                print('%s: %s ' % (codewith_dec_to_ai_name[ai[0:3]], val))
+            else:
+                print('%s: %s ' % (ai, val))
+
     def get_hri_text(self):
         # get Human Readable Interpretation text
         text_with_nfc1 = ''
