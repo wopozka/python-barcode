@@ -289,14 +289,22 @@ class Gs1_128_AI(Code128):
                        'SECONDARY_SERIAL': '250', 'REF_TO_SOURCE': '251', 'GTDI': '253', 'GLM_EXTENSION': '254',
                        'GCN': '255', 'VAR_COUNT': '30', 'COUNT': '37'}
 
-    AI_WITH_DECIMAL_VALS = {'NET_WEIGHT_M': '310', 'LENGTH_m': '311', 'WIDTH_M': '312',
-                            'HEIGHT_M': '313', 'AREA_M2': '314', 'NET_VOLUME_L': '315', 'NET_VOLUME_M3': '316',
-                            'NET_WEIGHT_LB': '320', '321': 'LENGTH_I', '322': 'LENGTH_F', '323': 'LENGTH_Y',
+    AI_WITH_DECIMAL_VALS = {'NET_WEIGHT_M': '310', 'LENGTH_m': '311', 'WIDTH_M': '312', 'HEIGHT_M': '313',
+                            'AREA_M2': '314', 'NET_VOLUME_L': '315', 'NET_VOLUME_M3': '316', 'NET_WEIGHT_LB': '320',
+                            '321': 'LENGTH_I', '322': 'LENGTH_F', '323': 'LENGTH_Y',
                             '324': 'WIDTH_I', '325': 'WIDTH_F', '326': 'WIDTH_Y', '327': 'HEIGHT_I', '328': 'HEIGHT_F',
                             '329': 'HEIGHT_Y', 'GROSS_WEIGHT_KG': '330', 'LENGTH_M_LOG': '331', 'WIDTH_M_LOG': '332',
                             'HEIGHT_M_LOG': '333', 'AREA_M2_LOG': '334', 'VOLUME_L_LOG': '335', 'VOLUME_M3_LOG': '336',
-                            'KG_PER_M2': '337', 'GROSS_WEIGHT_LB': '340', 'LENGHT_I_LOG': '341', 'LENGHT_F_LOG': '342',
-
+                            'KG_PER_M2': '337', 'GROSS_WEIGHT_LB': '340', 'LENGTH_I_LOG': '341', 'LENGTH_F_LOG': '342',
+                            'LENGTH_Y_LOG': '343', 'WIDTH_I_LOG': '344', 'WIDTH_F_LOG': '345', 'WIDTH_Y_LOG': '346',
+                            'HEIGHT_I_LOG': '347', 'HEIGHT_F_LOG': '348', 'HEIGHT_Y_LOG': '349', 'AREA_I2': '350',
+                            'AREA_F2': '351', 'AREA_Y2': '352', 'AREA_I2_LOG': '353', 'AREA_F2_LOG': '354',
+                            'AREA_Y2_LOG': '355', 'NET_WEIGHT_T': '356', 'NET_VOLUME_OZ': '357', 'NET_VOLUME_Q': '360',
+                            'NET_VOLUME_G': '361', 'VOLUME_Q_LOG': '362', 'VOLUME_G_LOG': '363', 'VOLUME_I3': '364',
+                            'VOLUME_F3': '365', 'VOLUME_Y3': '366', 'VOLUME_I3_LOG': '367', 'VOLUME_F3_LOG': '368',
+                            'VOLUME_Y3_LOG': '369', 'AMOUNT_COMMON_CURRENCY': '390',
+                            'AMOUNT_CURRENCY_SPEC': '391', 'PRICE_COMMON_CURRENCY': '392', 'PRICE_CURRENCY_SPEC': '393',
+                            'PRCNT_OFF': '394', 'PRICE_UOM': '395'
                             }
     
     AI_WITH_FNC1 = {'10', '21', '22', '235', '240', '241', '242', '243', '250', '251', '253', '254', '255',
