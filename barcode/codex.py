@@ -284,13 +284,12 @@ class Gs1_128(Code128):  # noqa: N801
 
     def _build(self):
         orig_code = self.code
-        fnc1_char = [code128.C.self.FNC1_CHAR]
+        fnc1_char = [code128.C[self.FNC1_CHAR]]
         if self.code.startswith(self.FNC1_CHAR):
             self.code = self.code[1:]
-            fnc1_char = True
         encoded = super()._build()
         self.code = orig_code
-        return list(encoded[0]) + fnc1_char + encoded[1:]
+        return [encoded[0]] + fnc1_char + encoded[1:]
 
 class Gs1_128_AI(Code128):
     name = "GS1-128_AI"
@@ -364,6 +363,15 @@ class Gs1_128_AI(Code128):
             self.code = self.create_code()
         super().__init__(self.code, writer)
         self._charset = self._guess_charset(self.code[1:])
+
+    def _build(self):
+        orig_code = self.code
+        fnc1_char = [code128.C[self.FNC1_CHAR]]
+        if self.code.startswith(self.FNC1_CHAR):
+            self.code = self.code[1:]
+        encoded = super()._build()
+        self.code = orig_code
+        return [encoded[0]] + fnc1_char + encoded[1:]
 
     def set_sorted_ais(self, value):
         self.sorted_ais = value
