@@ -139,12 +139,18 @@ class Code128(Barcode):
     def __init__(self, code, writer=None) -> None:
         self.code = code
         self.writer = writer or self.default_writer()
-        self._charset = "B"
+        self._charset = self._guess_charset(code)
         self._buffer = ""
         check_code(self.code, self.name, code128.ALL)
 
     def __str__(self) -> str:
         return self.code
+
+    @staticmethod
+    def _guess_charset(code):
+        if all(a.isdigit() for a in code):
+            return 'C'
+        return 'B'
 
     @property
     def encoded(self):
@@ -229,6 +235,7 @@ class Code128(Barcode):
     def _build(self):
         encoded = [code128.START_CODES[self._charset]]
         for i, char in enumerate(self.code):
+            print(encoded)
             encoded.extend(self._maybe_switch_charset(i))
             code_num = self._convert(char)
             if code_num is not None:
@@ -279,7 +286,10 @@ class Gs1_128(Code128):  # noqa: N801
 class Gs1_128_AI(Code128):
     name = "GS1-128_AI"
     FNC1_CHAR = "\xf1"
-    FC_CHAR = "\x1d"
+    # FC_CHAR = "\x1d"
+    # for optimalization reasons it is reasonable to use FNC1_CHAR as separator
+    # as FNC1_CHAR is present in all three charsets
+    FC_CHAR = FNC1_CHAR
 
     # Application_Identifiers: AI name: AI code
     AI_NAME_TO_CODE = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'BEST_BEFORE:': '15',
@@ -344,6 +354,7 @@ class Gs1_128_AI(Code128):
         else:
             self.code = self.create_code()
         super().__init__(self.code, writer)
+        self._charset = self._guess_charset(self.code[1:])
 
     def set_sorted_ais(self, value):
         self.sorted_ais = value

@@ -47,3 +47,19 @@ CREATE_CODE = (
 def test_create_code(target, answer):
     gs1_128 = Gs1_128_AI(target)
     assert gs1_128.create_code() == gs1_128.FNC1_CHAR + answer
+
+CODE_BUILD_TEST = (
+    ('(01)01234567891011(11)200622(17)240622(21)88888888', [],),
+)
+@pytest.mark.parametrize('target, answer', CODE_BUILD_TEST)
+def test_code_build(target, answer):
+    gs1_128 = Gs1_128_AI(target)
+    assert gs1_128._build() == answer
+
+GUES_CHARSET_TEST = (
+    ('(01)01234567891011(11)200622(17)240622(21)88888888', 'C',),
+)
+@pytest.mark.parametrize('target, answer', GUES_CHARSET_TEST)
+def test_guess_charset(target, answer):
+    gs1_128 = Gs1_128_AI(target)
+    assert Gs1_128_AI._guess_charset(gs1_128.code[1:]) == answer
