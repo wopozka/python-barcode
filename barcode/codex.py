@@ -287,7 +287,7 @@ class Gs1_128_AI(Code128):
     name = "GS1-128_AI"
     FNC1_CHAR = "\xf1"
     # FC_CHAR = "\x1d"
-    # for optimalization reasons it is reasonable to use FNC1_CHAR as separator
+    # for optimization reasons it is reasonable to use FNC1_CHAR as separator
     # as FNC1_CHAR is present in all three charsets
     FC_CHAR = FNC1_CHAR
 
