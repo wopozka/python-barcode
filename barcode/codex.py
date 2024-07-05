@@ -169,6 +169,10 @@ class Code128(Barcode):
         self._charset = which
         return [code]
 
+    # to be redefined in subclass if required
+    def _is_char_FNC1_CHAR(self, char):
+        return False
+
     def _maybe_switch_charset(self, pos):
         char = self.code[pos]
         next_ = self.code[pos : pos + 10]
@@ -184,13 +188,16 @@ class Code128(Barcode):
 
         codes = []
         if self._charset == "C" and not char.isdigit():
-            if char in code128.B:
-                codes = self._new_charset("B")
-            elif char in code128.A:
-                codes = self._new_charset("A")
-            if len(self._buffer) == 1:
-                codes.append(self._convert(self._buffer[0]))
-                self._buffer = ""
+            if self._is_char_FNC1_CHAR(char) and not self._buffer:
+                return codes
+            else:
+                if char in code128.B:
+                    codes = self._new_charset("B")
+                elif char in code128.A:
+                    codes = self._new_charset("A")
+                if len(self._buffer) == 1:
+                    codes.append(self._convert(self._buffer[0]))
+                    self._buffer = ""
         elif self._charset == "B":
             if look_next():
                 codes = self._new_charset("C")
@@ -290,6 +297,9 @@ class Gs1_128(Code128):  # noqa: N801
         self.code = orig_code
         return [encoded[0]] + fnc1_char + encoded[1:]
 
+    def _is_char_FNC1_CHAR(self, char):
+        return char == self.FNC1_CHAR
+
 class Gs1_128_AI(Code128):
     name = "GS1-128_AI"
     FNC1_CHAR = "\xf1"
@@ -371,6 +381,9 @@ class Gs1_128_AI(Code128):
         encoded = super()._build()
         self.code = orig_code
         return [encoded[0]] + fnc1_char + encoded[1:]
+
+    def _is_char_FNC1_CHAR(self, char):
+        return char == self.FNC1_CHAR
 
     def set_sorted_ais(self, value):
         self.sorted_ais = value
