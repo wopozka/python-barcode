@@ -70,6 +70,7 @@ def test_code_build(target, answer):
 
 GUES_CHARSET_TEST = (
     ('(01)01234567891011(11)200622(17)240622(21)88888888', 'C',),
+    ('(01)08720299927469(11)240621(17)250621(10)20240621/0001(21)xyz', 'B',),
 )
 @pytest.mark.parametrize('target, answer', GUES_CHARSET_TEST)
 def test_guess_charset(target, answer):
