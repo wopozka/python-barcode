@@ -235,7 +235,6 @@ class Code128(Barcode):
     def _build(self):
         encoded = [code128.START_CODES[self._charset]]
         for i, char in enumerate(self.code):
-            print(encoded)
             encoded.extend(self._maybe_switch_charset(i))
             code_num = self._convert(char)
             if code_num is not None:
