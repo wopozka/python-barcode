@@ -344,10 +344,17 @@ class Gs1_128_AI(Code128):
                     '8019', '8020', '8030', '8110', '8026', '8111', '8112', '8200', '90', '91', '92', '93', '94', '95',
                     '96', '97', '98', '99'
                     }
-    AI_VS_FIXED_LENGTH = {'00': 18, '01': 14, '02': 14, '11': 6, '12': 6, '13': 6, '15': 6, '16': 6, '17': 6, '20': 2}
+    AI_VS_FIXED_LENGTH = {'00': 18, '01': 14, '02': 14, '11': 6, '12': 6, '13': 6, '15': 6, '16': 6, '17': 6, '20': 2,
+                          '410': 13, '411': 13, '412': 13, '413': 13, '414': 13, '415': 13, '416': 13, '417': 13,
+                          }
+
+    #below need 6 number values
     AI_VS_FIXED_LENGTH_WITH_DECIMAL = {'310', '311', '312', '313', '314', '315', '316', '320', '321', '322', '323',
                                        '324', '325', '326', '327', '328', '329', '330', '331', '332', '333', '334',
-                                       '335', '336', '337'}
+                                       '335', '336', '337', '340', '341', '342', '343', '344', '345', '346', '347',
+                                       '348', '349', '350', '351', '352', '353', '354', '355', '356', '357',
+                                       '360', '361',  '362', '363', '364', '365', '366', '367', '368', '369',
+                                       '390', '391', '392', '393', '394', '395'}
 
     def __init__(self, code, sorted_ais=True, writer=None) -> None:
         self.sorted_ais = sorted_ais
@@ -408,7 +415,7 @@ class Gs1_128_AI(Code128):
 
     @staticmethod
     def check_if_code_correct(code_with_brackets):
-        # correct code is when all AI are surounded with brackets, and values are not, let's just check it
+        # correct code is when all AI are surrounded with brackets, and values are not, let's just check it
         if not code_with_brackets:
             return False
         in_bracket = 0
