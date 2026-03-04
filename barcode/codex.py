@@ -370,6 +370,10 @@ class Gs1_128_AI(Code128):
             self.ai_value = list()
             for ai_val in code:
                 self.ai_value.append(self.get_code_and_val(ai_val[0], ai_val[1]))
+        elif isinstance(code, dict):
+            self.ai_value = list()
+            for ai, val in code.items():
+                self.ai_value.append(self.get_code_and_val(ai, val))
         else:
             print('Code for barcode must be either as string or tuple/list (ai, value).')
             return
@@ -398,6 +402,13 @@ class Gs1_128_AI(Code128):
             self.code = self.create_code()
 
     def get_code_and_val(self, ai, val):
+        """
+        Return Application Identifier code and value for provided AI name or code and value, also check if value
+        is correct for
+        :param ai: AI name or code
+        :param val: value for provided AI, if AI has fixed length, then value should be of that length, if AI has fixed length with
+        :return: tuple of AI code and value
+        """
         if ai in self.AI_NAME_TO_CODE:
             ai = self.AI_NAME_TO_CODE[ai]
         if ai in self.AI_VS_FIXED_LENGTH:
