@@ -529,8 +529,10 @@ class Gs1_128_AI(Code128):
             ais_with_nfc1 = ais_with_nfc1[0:-1]
         return self.FNC1_CHAR + ais_without_nfc1 + ais_with_nfc1
 
-    def get_fullcode(self):
+    def get_fullcode(self, astext=True):
         # return super().get_fullcode()[1:]
+        if astext:
+            return ''.join(self.get_hri_text())
         return self.get_hri_text()
 
     def get_fullcode_with_ai_description(self):
@@ -545,17 +547,17 @@ class Gs1_128_AI(Code128):
                 print('%s: %s ' % (ai, val))
 
     def get_hri_text(self):
-        # get Human Readable Interpretation text
-        text_with_nfc1 = ''
-        text_without_nfc1 = ''
+        # get Human Readable Interpretation text as list of (A)Val, values
+        text_with_nfc1 = list()
+        text_without_nfc1 = list()
         for ai, val in self.ai_value:
             if self.sorted_ais:
                 if self.is_fnc1_required(ai):
-                    text_with_nfc1 += '(' + ai + ')' + val
+                    text_with_nfc1.append('(' + ai + ')' + val)
                 else:
-                    text_without_nfc1 += '(' + ai + ')' + val
+                    text_without_nfc1.append('(' + ai + ')' + val)
             else:
-                text_with_nfc1 += '(' + ai + ')' + val
+                text_with_nfc1.append('(' + ai + ')' + val)
         return text_without_nfc1 + text_with_nfc1
 
     def render(self, writer_options=None, text=None):
