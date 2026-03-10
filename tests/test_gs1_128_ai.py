@@ -77,3 +77,13 @@ GUES_CHARSET_TEST = (
 def test_guess_charset(target, answer):
     gs1_128 = Gs1_128_AI(target)
     assert Gs1_128_AI._guess_charset(gs1_128.code[1:]) == answer
+
+ROUND_RUN_TEST = (
+    ('(01)08720299927469(11)240621(17)250621(10)20240621/0001', '(01)08720299927469(11)240621(17)250621(10)20240621/0001'),
+    ({'GTIN': '08720299927469', 'PROD_DATE': '240621', 'USE_BY_OR_EXPIRY': '250621', 'BATCH/LOT': '20240621/0001'}, '(01)08720299927469(11)240621(17)250621(10)20240621/0001'),
+)
+
+@pytest.mark.parametrize('target, answer', ROUND_RUN_TEST)
+def test_round(target, answer):
+    gs1_128 = Gs1_128_AI(target)
+    assert gs1_128.get_fullcode() == answer
