@@ -375,7 +375,7 @@ class Gs1_128_AI(Code128):
             for ai, val in code.items():
                 self.ai_value.append(self.get_code_and_val(ai, val))
         else:
-            print('Code for barcode must be either as string or tuple/list (ai, value).')
+            print('Code for barcode must be either as string, tuple/list (ai, value) or dict {ai: value}.')
             return
         if self.literal_code is not None:
             self.code = self.literal_code
