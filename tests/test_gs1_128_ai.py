@@ -24,6 +24,7 @@ def test_get_val_for_ai_with_fixed_length_decimals(target, answer):
 
 VISUAL_TO_TUPLE = (
     ('(01)08720299927469(11)240621(17)250621(10)20240621/0001', (('01', '08720299927469',), ('11', '240621',), ('17', '250621',), ('10', '20240621/0001',),)),
+    ({'GTIN': '08720299927469', 'PROD_DATE': '240621', 'USE_BY_OR_EXPIRY': '250621', 'BATCH/LOT': '20240621/0001'}, (('01', '08720299927469',), ('11', '240621',), ('17', '250621',), ('10', '20240621/0001',),)),
 )
 @pytest.mark.parametrize('target, answer', VISUAL_TO_TUPLE)
 def test_get_ai_and_vals_from_brackets(target, answer):
