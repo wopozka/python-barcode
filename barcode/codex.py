@@ -309,8 +309,8 @@ class Gs1_128_AI(Code128):
     FC_CHAR = FNC1_CHAR
 
     # Application_Identifiers: AI name: AI code
-    AI_NAME_TO_CODE = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'BEST_BEFORE:': '15',
-                       'PROD_DATE': '11', 'DUE_DATE': '12', 'PACK_DATE': '13', 'BEST_BEFORE': '15', 'SELL_BY': '16',
+    AI_NAME_TO_CODE = {'SSCC': '00', 'GTIN': '01', 'CONTENT': '02', 'BATCH/LOT': '10', 'PROD_DATE': '11',
+                       'DUE_DATE': '12', 'PACK_DATE': '13', 'BEST_BEFORE': '15', 'SELL_BY': '16',
                        'USE_BY_OR_EXPIRY': '17', 'VARIANT': '20', 'SERIAL': '21', 'CPV': '22', 'TPX': '235',
                        'ADDITIONAL_ID': '240', 'CUST_PART_NO': '241', 'MTO_VARIANT': '242', 'PCN': '243',
                        'SECONDARY_SERIAL': '250', 'REF_TO_SOURCE': '251', 'GTDI': '253', 'GLM_EXTENSION': '254',
@@ -356,7 +356,7 @@ class Gs1_128_AI(Code128):
                                        '360', '361',  '362', '363', '364', '365', '366', '367', '368', '369',
                                        '390', '391', '392', '393', '394', '395'}
 
-    def __init__(self, code, sorted_ais=True, writer=None) -> None:
+    def __init__(self, code, sorted_ais=False, writer=None) -> None:
         self.sorted_ais = sorted_ais
         self.code = None
         self.literal_code = None
@@ -506,11 +506,24 @@ class Gs1_128_AI(Code128):
         if not (month.isdigit() and 1 <= int(month) <= 12):
             print('Month value incorrect, only numbers from range 01-12 allowed: %s' % date[0:2])
             return_val = False
-        if not(day and day.isdigit() and months_days[int(month)] > int(day)):
+        if (not(day and day.isdigit() and months_days[int(month)] > int(day))
+                or not self.is_february_ok(year, month, day)):
             print('Day value incorrect, only number allowed and number of days should not exceed %s' %
                   str(months_days[int(month)]))
             return_val = False
         return return_val
+
+    @staticmethod
+    def is_february_ok(year, month, day):
+        if month != '02':
+            return True
+        if int(day) > 29:
+            print('February can not have more than 29 days.')
+            return False
+        if int(day) == 29 and not (int(year) % 4 == 0 and (int(year) % 100 != 0 or int(year) % 400 == 0)):
+            print('February can have 29 days only in leap year, provided year is not leap.')
+            return False
+        return True
 
     def create_code(self):
         ais_with_nfc1 = ''
