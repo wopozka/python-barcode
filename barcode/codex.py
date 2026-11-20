@@ -160,7 +160,7 @@ class Code128(Barcode):
             raise BarcodeError("Code 128 requires at least one character")
         self.code = code
         self.writer = writer or self.default_writer()
-        self._charset = "C"
+        self._charset = Code128.guess_charset(code)
         self._digit_buffer = ""  # Accumulate pairs of digits for charset C
         check_code(self.code, self.name, code128.ALL)
 
@@ -173,6 +173,15 @@ class Code128(Barcode):
 
     def get_fullcode(self) -> str:
         return self.code
+
+    @staticfunction
+    def guess_charset(code):
+        """Guess the best charset for a given code. The if there are only digits, it is usually much better do set C
+        charset, as it will encode two digits per code. On another case it is better to use B charset, as it covers all
+        ascii characters. The A charset does not cover small nummbers, so it uswage is not recommended."""
+        if all(c.isdigit() for c in code):
+            return "C"
+        return "B"
 
     def _new_charset(self, which: Literal["A", "B", "C"]) -> list[int]:
         if which == self._charset:
