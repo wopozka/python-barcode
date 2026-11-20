@@ -488,7 +488,7 @@ class Gs1_128_AI(Code128):
         return ai in self.AI_WITH_FNC1
 
     @staticmethod
-    def is_date_format_correct(self, date):
+    def is_date_format_correct(date):
         # let's check if date is in correct format, correct format is
         # YY - year, as the last two digits - required field
         # MM - months, as two digits, only values 01-12 accepted - required field
@@ -507,14 +507,14 @@ class Gs1_128_AI(Code128):
             print('Month value incorrect, only numbers from range 01-12 allowed: %s' % date[0:2])
             return_val = False
         if (not(day and day.isdigit() and months_days[int(month)] > int(day))
-                or not self.is_february_ok(year, month, day)):
+                or not self.can_february_have_29_days(year, month, day)):
             print('Day value incorrect, only number allowed and number of days should not exceed %s' %
                   str(months_days[int(month)]))
             return_val = False
         return return_val
 
     @staticmethod
-    def is_february_ok(year, month, day):
+    def can_february_have_29_days(year, month, day):
         if month != '02':
             return True
         if int(day) > 29:
