@@ -101,7 +101,8 @@ _charset_b = (
 ALL = set(_common + _charset_a + _charset_b)
 A = {c: i for i, c in enumerate(_charset_a)}
 B = {c: i for i, c in enumerate(_charset_b)}
-C = {"TO_B": 100, "TO_A": 101, "\xf1": 102}
+FNC1 = "\xf1"
+C = {"TO_B": 100, "TO_A": 101, FNC1: 102}
 
 CODES = (
     "11011001100",

@@ -141,6 +141,18 @@ class PZN8(PZN7):
     digits = 7
 
 
+_Charset = Literal["A", "B", "C"]
+# Order matters: it is the tie-break preference when choosing a charset.
+_CHARSETS: tuple[_Charset, ...] = ("C", "B", "A")
+_TABLES: dict[_Charset, dict[str, int]] = {
+    "A": code128.A,
+    "B": code128.B,
+    "C": code128.C,
+}
+_DIGITS = frozenset("0123456789")
+_INF = float("inf")
+
+
 class Code128(Barcode):
     """Initializes a new Code128 instance. The checksum is added automatically
     when building the bars.
@@ -150,18 +162,14 @@ class Code128(Barcode):
     """
 
     name = "Code 128"
-    _charset: Literal["A", "B", "C"]
     code: str
     writer: BaseWriter
-    buffer: str
 
     def __init__(self, code: str, writer: BaseWriter | None = None) -> None:
         if not code:
             raise BarcodeError("Code 128 requires at least one character")
         self.code = code
         self.writer = writer or self.default_writer()
-        self._charset = "C"
-        self._digit_buffer = ""  # Accumulate pairs of digits for charset C
         check_code(self.code, self.name, code128.ALL)
 
     def __str__(self) -> str:
@@ -174,115 +182,70 @@ class Code128(Barcode):
     def get_fullcode(self) -> str:
         return self.code
 
-    def _new_charset(self, which: Literal["A", "B", "C"]) -> list[int]:
-        if which == self._charset:
-            raise ValueError(f"Already in charset {which}")
-        if which == "A":
-            code = self._convert("TO_A")
-        elif which == "B":
-            code = self._convert("TO_B")
-        elif which == "C":
-            code = self._convert("TO_C")
-        self._charset = which
-        return [code]
+    @staticmethod
+    def _steps(code: str, pos: int, charset: _Charset) -> list[tuple[list[int], int]]:
+        """Ways to encode the data at ``pos`` without leaving ``charset``.
 
-    # to be redefined in subclass if required
-    def _is_char_fnc1_char(self, char: str) -> bool:
-        """Whether a character is the FNC1 character.
-
-        May be redefined by subclasses if required. FNC1 char is defined in GS1-128
-        specification and it is defined just the same for all encodings therefore this
-        sign should be treated in a special way.
+        Returns ``(code_numbers, next_pos)`` pairs, most preferred first.
         """
-        return False
+        char = code[pos]
+        if charset == "C":
+            if char == code128.FNC1:
+                return [([code128.C[char]], pos + 1)]
+            pair = code[pos : pos + 2]
+            if len(pair) == 2 and pair[0] in _DIGITS and pair[1] in _DIGITS:
+                return [([int(pair)], pos + 2)]
+            return []
+        own = _TABLES[charset]
+        other = _TABLES["B" if charset == "A" else "A"]
+        if char in own:
+            return [([own[char]], pos + 1)]
+        if char in other:
+            # A single character from the other charset: SHIFT + char.
+            return [([own["SHIFT"], other[char]], pos + 1)]
+        return []
 
-    def _maybe_switch_charset(self, pos: int) -> list[int]:
-        char = self.code[pos]
-        next_ = self.code[pos : pos + 10]
+    def _build(self) -> list[int]:
+        """Encode the data into the shortest possible list of code numbers.
 
-        def look_next() -> bool:
-            digits = 0
-            for c in next_:
-                if c.isdigit():
-                    digits += 1
-                else:
+        Dynamic programming over (position, active charset): ``cost[i][s]`` is the
+        minimal number of symbols needed to encode ``code[i:]`` when charset ``s``
+        is active at position ``i``. The symbol list is then reconstructed from the
+        start. On ties, staying in the current charset is preferred over switching,
+        and charset C over B over A.
+        """
+        code = self.code
+        n = len(code)
+        cost = [dict.fromkeys(_CHARSETS, 0.0) for _ in range(n + 1)]
+        stay = [dict.fromkeys(_CHARSETS, _INF) for _ in range(n + 1)]
+        for i in range(n - 1, -1, -1):
+            for s in _CHARSETS:
+                stay[i][s] = min(
+                    (len(syms) + cost[j][s] for syms, j in self._steps(code, i, s)),
+                    default=_INF,
+                )
+            for s in _CHARSETS:
+                # Switching twice in a row is never useful, so one switch suffices.
+                switch = 1 + min(stay[i][t] for t in _CHARSETS if t != s)
+                cost[i][s] = min(stay[i][s], switch)
+
+        charset = min(_CHARSETS, key=lambda s: cost[0][s])
+        encoded = [code128.START_CODES[charset]]
+        i = 0
+        while i < n:
+            for syms, j in self._steps(code, i, charset):
+                if len(syms) + cost[j][charset] == cost[i][charset]:
+                    encoded.extend(syms)
+                    i = j
                     break
-            return digits > 3
-
-        codes: list[int] = []
-        if self._charset == "C" and not char.isdigit():
-            if self._is_char_fnc1_char(char) and not self._digit_buffer:
-                return codes
-            if char in code128.B:
-                codes = self._new_charset("B")
-            elif char in code128.A:
-                codes = self._new_charset("A")
-            assert self._charset != "C"
-            if len(self._digit_buffer) == 1:
-                # Flush the remaining single digit from the buffer
-                codes.append(self._convert(self._digit_buffer[0]))
-                self._digit_buffer = ""
-        elif self._charset == "B":
-            if look_next():
-                codes = self._new_charset("C")
-            elif char not in code128.B and char in code128.A:
-                codes = self._new_charset("A")
-        elif self._charset == "A":
-            if look_next():
-                codes = self._new_charset("C")
-            elif char not in code128.A and char in code128.B:
-                codes = self._new_charset("B")
-        return codes
-
-    def _convert(self, char: str) -> int:
-        """Convert a character to a code number for the current charset.
-
-        NOTE: encoding digits with charset C requires buffering and is not supported
-        here. Use _convert_or_buffer instead.
-        """
-        if self._charset == "A":
-            return code128.A[char]
-        if self._charset == "B":
-            return code128.B[char]
-        if self._charset == "C":
-            if char in ["TO_A", "TO_B"]:
-                return code128.C[char]
-            raise RuntimeError("Use _convert_or_buffer for charset C.")
-        raise RuntimeError(
-            f"Character {char} could not be converted in charset {self._charset}."
-        )
-
-    def _convert_or_buffer(self, char: str) -> int | None:
-        """Convert a character to a code number for the current charset.
-
-        If charset C is active then digits are encoded in pairs. When the first digit
-        is encountered, it is buffered and None is returned.
-        """
-        if self._charset != "C":
-            return self._convert(char)
-        if char in code128.C:
-            return code128.C[char]
-        if char.isdigit():
-            self._digit_buffer += char
-            if len(self._digit_buffer) == 1:
-                # Wait for the second digit to group in pairs
-                return None
-            assert len(self._digit_buffer) == 2
-            value = int(self._digit_buffer)
-            self._digit_buffer = ""
-            return value
-        raise RuntimeError(f"Character {char} could not be converted in charset C.")
-
-    def _try_to_optimize(self, encoded: list[int]) -> list[int]:
-        # A START_C followed by an immediate charset switch can be folded into a
-        # single START code. In charset C, however, the code number 99 is the
-        # data pair "99" (not the TO_C switch marker), so it must never be folded
-        # away -- doing so silently dropped a leading "99" from the barcode.
-        if encoded[0] == code128.START_CODES["C"] and encoded[1] in (
-            code128.C["TO_A"],
-            code128.C["TO_B"],
-        ):
-            encoded[:2] = [code128.TO[encoded[1]]]
+            else:
+                target = next(
+                    t
+                    for t in _CHARSETS
+                    if t != charset and 1 + stay[i][t] == cost[i][charset]
+                )
+                encoded.append(_TABLES[charset]["TO_" + target])
+                charset = target
         return encoded
 
     def _calculate_checksum(self, encoded: list[int]) -> int:
@@ -290,25 +253,6 @@ class Code128(Barcode):
         for i, code_num in enumerate(encoded[1:], start=1):
             cs.append(i * code_num)
         return sum(cs) % 103
-
-    def _build(self) -> list[int]:
-        # Reset the state that gets mutated while building so that repeated
-        # calls on the same instance are deterministic (see #143).
-        self._charset = "C"
-        self._digit_buffer = ""
-        encoded: list[int] = [code128.START_CODES[self._charset]]
-        for i, char in enumerate(self.code):
-            encoded.extend(self._maybe_switch_charset(i))
-            code_num = self._convert_or_buffer(char)
-            if code_num is not None:
-                encoded.append(code_num)
-        # If we finish in charset C with a single digit remaining in the buffer,
-        # switch to charset B and flush out the buffer.
-        if len(self._digit_buffer) == 1:
-            encoded.extend(self._new_charset("B"))
-            encoded.append(self._convert(self._digit_buffer[0]))
-            self._digit_buffer = ""
-        return self._try_to_optimize(encoded)
 
     def build(self) -> list[str]:
         encoded = self._build()
@@ -340,7 +284,7 @@ class Gs1_128(Code128):  # noqa: N801
 
     name = "GS1-128"
 
-    FNC1_CHAR = "\xf1"
+    FNC1_CHAR = code128.FNC1
 
     def __init__(self, code: str, writer: BaseWriter | None = None) -> None:
         code = self.FNC1_CHAR + code
@@ -348,9 +292,6 @@ class Gs1_128(Code128):  # noqa: N801
 
     def get_fullcode(self) -> str:
         return super().get_fullcode()[1:]
-
-    def _is_char_fnc1_char(self, char: str) -> bool:
-        return char == self.FNC1_CHAR
 
 
 # For pre 0.8 compatibility
