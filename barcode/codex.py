@@ -494,24 +494,17 @@ class Gs1_128_AI(Code128):
         # MM - months, as two digits, only values 01-12 accepted - required field
         # DD - days, if not necessary then use 00
         months_days = {1: 31, 2: 29, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
-        if len(date) < 4:
+        if len(date) != 6 or not date.isdigit():
+            print('Date must have format YYMMDD (6 digits): %s' % date)
             return False
-        year = date[0:2]
-        month = date[2:4]
-        day = date[4:] if len(date) > 4 else ''
-        return_val = True
-        if not year.isdigit():
-            print('Year value incorrect, only numbers allowed: %s' % date[0:2])
-            return_val = False
-        if not (month.isdigit() and 1 <= int(month) <= 12):
-            print('Month value incorrect, only numbers from range 01-12 allowed: %s' % date[0:2])
-            return_val = False
-        if (not(day and day.isdigit() and months_days[int(month)] > int(day))
-                or not self.can_february_have_29_days(year, month, day)):
-            print('Day value incorrect, only number allowed and number of days should not exceed %s' %
-                  str(months_days[int(month)]))
-            return_val = False
-        return return_val
+        year, month, day = date[0:2], date[2:4], date[4:6]
+        if not 1 <= int(month) <= 12:
+            print('Month value incorrect, only numbers from range 01-12 allowed: %s' % month)
+            return False
+        if day != '00' and not 1 <= int(day) <= months_days[int(month)]:
+            print('Day value incorrect, number of days should not exceed %s' % months_days[int(month)])
+            return False
+        return Gs1_128_AI.can_february_have_29_days(year, month, day)
 
     @staticmethod
     def can_february_have_29_days(year, month, day):
